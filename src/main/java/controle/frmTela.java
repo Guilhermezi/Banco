@@ -120,6 +120,33 @@ public class frmTela extends javax.swing.JFrame{
         }
     }
 
+    private void btnNovoActionPerfomed(java.awt.event.ActionEvent evt) {
+        txtCod.setText(""); // limpa a caixa de texto em questão
+        txtNome.setText("");
+        txtDtNasc.setText("");
+        txtTelefone.setText("");
+        txtEmail.setText("");
+        txtCod.requestFocus(); // posiciona o cursor neste campo para digitação
+    }
+
+    private void btnGravarActionPerformed(java.awt.event.ActionEvent evt){
+        String nome = txtNome.getText();
+        String data_nasc = txtDtNasc.getText();
+        String email = txtTelefone.getText();
+        String telefone = txtTelefone.getText();
+
+        try {
+            String insert_sql="insert into tbclientes (nome,telefone, email, dt_nasc) values ('" + nome + "','" + telefone + "','" + email + "','" + data_nasc + "')";
+            con_cliente.statement.executeUpdate(insert_sql);
+            JOptionPane.showMessageDialog(null, "Gravação realizada com sucesso!!","Mensagem do Programa",JOptionPane.INFORMATION_MESSAGE);
+            con_cliente.resultSet.first();
+            preencherTabela();
+            mostrar_Dados();
+        }catch (SQLException errosql){
+            JOptionPane.showMessageDialog(null, "\n Erro na gravação :\n"+errosql,"Mensagem do Programa",JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
 
