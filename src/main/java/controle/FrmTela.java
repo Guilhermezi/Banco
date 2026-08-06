@@ -2,12 +2,12 @@ package controle;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel; // modelo de dados da tabela (linhas/colunas)
-import java.sql.SQLException; // para capturar erros do banco
-import java.util.List; // para a lista de clientes carregada pelo DAO
+import java.sql.*; // para capturar erros do banco
+import java.util.*; // para a lista de clientes carregada pelo DAO
 
 // A tela é uma janela (JFrame). "extends" faz esta classe herdar tudo do JFrame.
 // Responsabilidade desta classe: SOMENTE a interface gráfica e chamar os métodos do DAO.
-public class frmTela extends javax.swing.JFrame {
+public class FrmTela extends javax.swing.JFrame {
     private ClienteDAO dao; // acesso aos dados (listar, inserir, alterar, excluir)
     private List<Cliente> clientes; // clientes carregados (usada na navegação e na grid)
     private int indiceAtual; // posição atual na lista (qual registro está sendo mostrado)
@@ -37,7 +37,7 @@ public class frmTela extends javax.swing.JFrame {
     private JLabel lblStatus;         // texto que mostra em qual registro estamos
 
     // Construtor: roda automaticamente quando criamos "new frmTela()"
-    public frmTela() {
+    public FrmTela() {
         initComponents(); // monta a tela (cria e posiciona todos os componentes)
         dao = new ClienteDAO(); // cria o objeto que acessa o banco
         carregarDados(); // busca os clientes e mostra na tela
@@ -126,7 +126,7 @@ public class frmTela extends javax.swing.JFrame {
         btnExcluir.setBounds(515, 375, 80, 25);
 
         lblStatus = new JLabel("Registro: 1"); // texto inicial da barra de status
-        lblStatus.setBounds(20, 415, 300, 20);  // posição da barra de status
+        lblStatus.setBounds(20, 410, 300, 20);  // posição da barra de status
 
         // --- add(...) coloca cada componente na janela. Sem isto nada aparece! ---
         add(lblTitulo);
@@ -294,33 +294,49 @@ public class frmTela extends javax.swing.JFrame {
 
     // Botão "|<": vai ao primeiro registro
     private void btnPrimeiroRegestroActionPerformed(java.awt.event.ActionEvent evt) {
-        if (!clientes.isEmpty()) { // se existe algum registro...
-            indiceAtual = 0; // vai para a primeira posição
-            mostrarDados(); // mostra os dados
+        try {
+            if (!clientes.isEmpty()) { // se existe algum registro...
+                indiceAtual = 0; // vai para a primeira posição
+                mostrarDados(); // mostra os dados
+            }
+        } catch (Exception erro) { // proteção contra qualquer erro inesperado
+            JOptionPane.showMessageDialog(null, "Erro ao ir ao primeiro registro: " + erro, "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     // Botão ">|": vai ao último registro
     private void btnUltimoRegestroActionPerformed(java.awt.event.ActionEvent evt) {
-        if (!clientes.isEmpty()) { // se existe algum registro...
-            indiceAtual = clientes.size() - 1; // vai para a última posição
-            mostrarDados(); // mostra os dados
+        try {
+            if (!clientes.isEmpty()) { // se existe algum registro...
+                indiceAtual = clientes.size() - 1; // vai para a última posição
+                mostrarDados(); // mostra os dados
+            }
+        } catch (Exception erro) {
+            JOptionPane.showMessageDialog(null, "Erro ao ir ao último registro: " + erro, "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     // Botão "<": volta um registro
     private void btnVoltarUmRegestroActionPerformed(java.awt.event.ActionEvent evt) {
-        if (indiceAtual > 0) { // se não está no primeiro...
-            indiceAtual--; // ...volta uma posição
-            mostrarDados(); // mostra os dados
+        try {
+            if (indiceAtual > 0) { // se não está no primeiro...
+                indiceAtual--; // ...volta uma posição
+                mostrarDados(); // mostra os dados
+            }
+        } catch (Exception erro) {
+            JOptionPane.showMessageDialog(null, "Erro ao voltar um registro: " + erro, "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     // Botão ">": avança um registro
     private void btnAvancarUmRegestroActionPerformed(java.awt.event.ActionEvent evt) {
-        if (indiceAtual < clientes.size() - 1) { // se não está no último...
-            indiceAtual++; // ...avança uma posição
-            mostrarDados(); // mostra os dados
+        try {
+            if (indiceAtual < clientes.size() - 1) { // se não está no último...
+                indiceAtual++; // ...avança uma posição
+                mostrarDados(); // mostra os dados
+            }
+        } catch (Exception erro) {
+            JOptionPane.showMessageDialog(null, "Erro ao avançar um registro: " + erro, "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -404,10 +420,5 @@ public class frmTela extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "\n Os dados digitados não foram localizados!! :\n " + errosql, "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE); // ...mostra o erro
         }
     }
-
-    @SuppressWarnings("unchecked") // avisa o compilador para ignorar alertas deste bloco
-    public static void main(String[] args) { // ponto de entrada do programa
-        frmTela tela = new frmTela(); // cria a janela (construtor carrega os dados)
-        tela.setVisible(true); // exibe a janela na tela
-    }
 }
+

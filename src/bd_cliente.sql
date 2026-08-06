@@ -39,6 +39,16 @@ CREATE TABLE `tbclientes` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 --
+-- Estrutura da tabela `usuarios`
+--
+CREATE TABLE `tbusuario`(
+    id int NOT NULL AUTO_INCREMENT,
+    usuario varchar(50) NOT NULL,
+    senha varchar(64) NOT NULL,
+    PRIMARY KEY (id)
+)
+
+--
 -- Extraindo dados da tabela `tbclientes`
 --
 
