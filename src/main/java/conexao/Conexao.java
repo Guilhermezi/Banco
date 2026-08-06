@@ -1,48 +1,23 @@
 package conexao;
 
-import javax.swing.JOptionPane;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
+// Classe responsável SOMENTE por fornecer a conexão com o banco de dados
 public class Conexao {
-    final private String driver = "com.mysql.cj.jdbc.Driver"; // definição do driver MySql para acesso aos dados
-    final private String url = "jdbc:mysql://localhost/clientes"; // acesso ao bd clientes no servidor - easyphp
-    final private String usuario = "root"; // usuário do MySql - easyphp
-    final private String senha = ""; // senha do MySql
-    private Connection conexao; // variável que armazenará a conexão aberta
-    public Statement statement; // variável para execução dos comandos SQL dentro do ambiente Java
-    public ResultSet resultSet; // variável que aramzenará o resultado da execução de um comando SQL
+    private static final String DRIVER = "com.mysql.cj.jdbc.Driver"; // driver do MySQL 8
+    private static final String URL = "jdbc:mysql://localhost/clientes"; // endereço do banco clientes
+    private static final String USUARIO = "root"; // usuário do MySQL
+    private static final String SENHA = ""; // senha do MySQL (vazia)
 
-    public boolean conecta() {
-        boolean result = true;
+    // Devolve uma conexão aberta. Quem chama (o DAO) é responsável por fechá-la.
+    public static Connection getConexao() throws SQLException {
         try {
-            Class.forName(driver);
-            conexao = DriverManager.getConnection(url, usuario, senha);
-            JOptionPane.showMessageDialog(null, "Conexão estabelecida", "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE);
-        } catch (ClassNotFoundException ex) {
-            JOptionPane.showMessageDialog(null, "Fonte de dados não localizada" + driver, "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE);
-            result = false;
-        } catch (SQLException Fonte) {
-            JOptionPane.showMessageDialog(null, "Erro na conexão com o banco!!" + Fonte, "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE);
-            result = false;
+            Class.forName(DRIVER); // carrega o driver do MySQL na memória
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("Driver JDBC do MySQL não encontrado", e);
         }
-        return result;
-    }
-
-    public void desconecta(){
-        try {
-            conexao.close();
-            JOptionPane.showMessageDialog(null,"Conexão com o banco fechada","Mensagem do Programa",JOptionPane.INFORMATION_MESSAGE);
-        }catch (SQLException fecha){
-
-        }
-    }
-
-    public void executaSQL(String sql){
-        try{
-            statement = conexao.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            resultSet = statement.executeQuery(sql);
-        }catch (SQLException excecao){
-            JOptionPane.showMessageDialog(null,"Erro no comando SQL! \n Erro: "+excecao,"Mensagem do Programa",JOptionPane.INFORMATION_MESSAGE);
-        }
+        return DriverManager.getConnection(URL, USUARIO, SENHA); // abre a conexão
     }
 }
