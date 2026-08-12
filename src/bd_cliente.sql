@@ -46,7 +46,7 @@ CREATE TABLE `tbusuario`(
     usuario varchar(50) NOT NULL,
     senha varchar(64) NOT NULL,
     PRIMARY KEY (id)
-)
+);
 
 --
 -- Extraindo dados da tabela `tbclientes`

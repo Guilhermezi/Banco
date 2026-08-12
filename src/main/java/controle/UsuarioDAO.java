@@ -30,4 +30,27 @@ public class UsuarioDAO {
             return false; // e considera o login inválido
         }
     }
+
+    // Verifica se um nome de usuário já existe no banco; true = já existe
+    public boolean existeUsuario(String usuario) throws SQLException {
+        String sql = "select id from tbusuario where usuario = ?"; // SELECT procurando pelo nome de login
+        try (Connection con = Conexao.getConexao(); // abre a conexão
+             PreparedStatement ps = con.prepareStatement(sql)) { // prepara o comando SQL
+            ps.setString(1, usuario); // preenche o "?" com o usuário digitado
+            try (ResultSet rs = ps.executeQuery()) { // executa o SELECT e guarda o resultado
+                return rs.next(); // true = já existe; false = nome livre
+            }
+        }
+    }
+
+    // Insere um novo usuário no banco (cadastro). A senha é gravada como hash
+    public void inserir(Usuario usuario) throws SQLException {
+        String sql = "insert into tbusuario (usuario, senha) values (?, ?)"; // INSERT nas colunas usuario e senha
+        try (Connection con = Conexao.getConexao(); // abre a conexão
+             PreparedStatement ps = con.prepareStatement(sql)) { // prepara o comando SQL
+            ps.setString(1, usuario.getUsuario()); // preenche o 1º "?" com o nome de login
+            ps.setString(2, Criptografia.hash(usuario.getSenha())); // preenche o 2º "?" com a senha em hash
+            ps.executeUpdate(); // executa o INSERT
+        }
+    }
 }

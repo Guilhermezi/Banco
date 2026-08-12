@@ -2,6 +2,8 @@ package controle;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel; // modelo de dados da tabela (linhas/colunas)
+import javax.swing.text.MaskFormatter; // máscara de digitação dos campos (data, telefone)
+import java.text.ParseException; // erro se a máscara estiver errada
 import java.sql.*; // para capturar erros do banco
 import java.util.*; // para a lista de clientes carregada pelo DAO
 
@@ -12,14 +14,14 @@ public class FrmTela extends javax.swing.JFrame {
     private List<Cliente> clientes; // clientes carregados (usada na navegação e na grid)
     private int indiceAtual; // posição atual na lista (qual registro está sendo mostrado)
     private int totalRegistros = 0; // total de registros carregados
+    private int codAtual = 0; // código do registro atual (auto-increment; não aparece na tela)
 
     // --- Campos (variáveis) da tela, criados no initComponents() ---
-    private JTextField txtCod;        // caixa de texto do código
-    private JTextField txtNome;       // caixa de texto do nome
-    private JTextField txtDtNasc;     // caixa de texto da data de nascimento
-    private JTextField txtTelefone;   // caixa de texto do telefone
-    private JTextField txtEmail;      // caixa de texto do e-mail
-    private JTextField txtPesquisa;   // caixa de texto da pesquisa por nome
+    private JTextField txtNome;            // caixa de texto do nome
+    private JFormattedTextField txtDtNasc; // caixa de texto da data (máscara ##/##/####)
+    private JFormattedTextField txtTelefone; // caixa de texto do telefone (máscara (##) ####-####)
+    private JTextField txtEmail;           // caixa de texto do e-mail
+    private JTextField txtPesquisa;        // caixa de texto da pesquisa por nome
 
     private JTable tblClientes;       // tabela (grid) que mostra os registros
     private DefaultTableModel modelo; // "conteúdo" da tabela: colunas e linhas
@@ -65,34 +67,30 @@ public class FrmTela extends javax.swing.JFrame {
         JLabel lblTitulo = new JLabel("Cadastro de Clientes"); // rótulo do título
         lblTitulo.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 18)); // fonte: negrito, tamanho 18
 
-        JLabel lblCod = new JLabel("Código:");           // rótulo "Código:"
         JLabel lblNome = new JLabel("Nome:");            // rótulo "Nome:"
         JLabel lblDtNasc = new JLabel("Data de Nascimento:"); // rótulo "Data de Nascimento:"
         JLabel lblTelefone = new JLabel("Telefone:");    // rótulo "Telefone:"
         JLabel lblEmail = new JLabel("E-mail:");         // rótulo "E-mail:"
         JLabel lblPesquisa = new JLabel("Pesquisar:");   // rótulo "Pesquisar:"
 
-        txtCod = new JTextField();        // cria a caixa de texto do código
         txtNome = new JTextField();       // cria a caixa de texto do nome
-        txtDtNasc = new JTextField();     // cria a caixa de texto da data
-        txtTelefone = new JTextField();   // cria a caixa de texto do telefone
+        txtDtNasc = criarCampoMascarado("##/##/####"); // caixa de texto da data com máscara
+        txtTelefone = criarCampoMascarado("(##) ####-####"); // caixa de texto do telefone com máscara
         txtEmail = new JTextField();      // cria a caixa de texto do e-mail
         txtPesquisa = new JTextField();   // cria a caixa de texto da pesquisa
 
         // setBounds(x, y, largura, altura) define a posição e o tamanho de cada componente
         lblTitulo.setBounds(20, 10, 300, 20);
-        lblCod.setBounds(20, 40, 60, 20);
-        txtCod.setBounds(20, 60, 80, 25);
-        lblNome.setBounds(130, 40, 60, 20);
-        txtNome.setBounds(130, 60, 250, 25);
-        lblDtNasc.setBounds(400, 40, 130, 20);
-        txtDtNasc.setBounds(400, 60, 110, 25);
+        lblNome.setBounds(20, 40, 60, 20);
+        txtNome.setBounds(20, 60, 250, 25);
+        lblDtNasc.setBounds(290, 40, 130, 20);
+        txtDtNasc.setBounds(290, 60, 110, 25);
         lblTelefone.setBounds(20, 95, 80, 20);
-        txtTelefone.setBounds(20, 115, 140, 25);
-        lblEmail.setBounds(180, 95, 60, 20);
-        txtEmail.setBounds(180, 115, 260, 25);
-        lblPesquisa.setBounds(470, 95, 80, 20);
-        txtPesquisa.setBounds(470, 115, 120, 25);
+        txtTelefone.setBounds(20, 115, 160, 25);
+        lblEmail.setBounds(200, 95, 60, 20);
+        txtEmail.setBounds(200, 115, 260, 25);
+        lblPesquisa.setBounds(480, 95, 80, 20);
+        txtPesquisa.setBounds(480, 115, 120, 25);
 
         // Cria o modelo da tabela sobrescrevendo isCellEditable para sempre retornar false
         modelo = new DefaultTableModel() {
@@ -130,13 +128,11 @@ public class FrmTela extends javax.swing.JFrame {
 
         // --- add(...) coloca cada componente na janela. Sem isto nada aparece! ---
         add(lblTitulo);
-        add(lblCod);
         add(lblNome);
         add(lblDtNasc);
         add(lblTelefone);
         add(lblEmail);
         add(lblPesquisa);
-        add(txtCod);
         add(txtNome);
         add(txtDtNasc);
         add(txtTelefone);
@@ -256,21 +252,48 @@ public class FrmTela extends javax.swing.JFrame {
     // Mostra o registro atual (posição indiceAtual da lista) nas caixas de texto
     public void mostrarDados() {
         if (clientes.isEmpty() || indiceAtual < 0) { // lista vazia = limpa os campos
-            txtCod.setText("");
+            codAtual = 0; // sem registro selecionado
             txtNome.setText("");
-            txtDtNasc.setText("");
-            txtTelefone.setText("");
+            txtDtNasc.setValue(null);
+            txtTelefone.setValue(null);
             txtEmail.setText("");
             lblStatus.setText("Nenhum registro");
             return;
         }
         Cliente c = clientes.get(indiceAtual); // pega o cliente da posição atual
-        txtCod.setText(String.valueOf(c.getCod())); // código
+        codAtual = c.getCod(); // guarda o código (não aparece na tela, usado em alterar/excluir)
         txtNome.setText(c.getNome());    // nome
-        txtDtNasc.setText(c.getDtNasc()); // data de nascimento
-        txtTelefone.setText(c.getTelefone()); // telefone
+        txtDtNasc.setValue(c.getDtNasc()); // data de nascimento
+        txtTelefone.setValue(c.getTelefone()); // telefone
         txtEmail.setText(c.getEmail());  // e-mail
         lblStatus.setText("Registro: " + (indiceAtual + 1) + " de " + clientes.size()); // barra de status
+    }
+
+    // Cria um campo de texto com máscara de digitação (ex.: ##/##/####)
+    private JFormattedTextField criarCampoMascarado(String mascara) {
+        try {
+            MaskFormatter formatador = new MaskFormatter(mascara); // máscara (define onde entram letras/números)
+            formatador.setPlaceholderCharacter(' '); // enquanto vazio, mostra espaços no lugar dos caracteres
+            return new JFormattedTextField(formatador); // cria o campo já com a máscara
+        } catch (ParseException erro) { // se a máscara estiver escrita errada...
+            return new JFormattedTextField(); // ...cria um campo normal (sem máscara)
+        }
+    }
+
+    // Lê o texto do campo de data; se estiver vazio devolve "" (em vez de "  /  /    ")
+    private String lerData() {
+        if (txtDtNasc.getValue() == null) { // campo vazio (não digitado por completo)...
+            return ""; // ...devolve vazio
+        }
+        return txtDtNasc.getText(); // devolve o texto com a máscara (ex.: 17/03/1939)
+    }
+
+    // Lê o texto do campo de telefone; se estiver vazio devolve "" (em vez da máscara com espaços)
+    private String lerTelefone() {
+        if (txtTelefone.getValue() == null) { // campo vazio...
+            return ""; // ...devolve vazio
+        }
+        return txtTelefone.getText(); // devolve o texto com a máscara (ex.: (11) 1234-5678)
     }
 
     // Evento: clique do mouse em uma linha da tabela
@@ -342,20 +365,32 @@ public class FrmTela extends javax.swing.JFrame {
 
     // Botão "Novo": limpa os campos para digitar um novo cadastro
     private void btnNovoActionPerfomed(java.awt.event.ActionEvent evt) {
-        txtCod.setText(""); // limpa a caixa de texto do código
+        codAtual = 0; // novo registro = ainda não existe código (o banco gera sozinho)
         txtNome.setText(""); // limpa o nome
-        txtDtNasc.setText(""); // limpa a data
-        txtTelefone.setText(""); // limpa o telefone
+        txtDtNasc.setValue(null); // limpa a data
+        txtTelefone.setValue(null); // limpa o telefone
         txtEmail.setText(""); // limpa o e-mail
-        txtCod.requestFocus(); // posiciona o cursor no campo código para digitação
+        txtNome.requestFocus(); // posiciona o cursor no campo nome para digitação
+    }
+
+    // Confere se todos os campos foram preenchidos; se faltar algum, avisa e devolve false
+    private boolean camposPreenchidos() {
+        if (txtNome.getText().trim().isEmpty() || lerData().isEmpty() || lerTelefone().isEmpty() || txtEmail.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Preencha todos os campos!!", "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE);
+            return false; // não pode gravar
+        }
+        return true; // todos os campos preenchidos
     }
 
     // Botão "Gravar": insere um novo registro no banco
     private void btnGravarActionPerformed(java.awt.event.ActionEvent evt) {
+        if (!camposPreenchidos()) { // se faltou preencher algum campo...
+            return; // ...não grava
+        }
         Cliente cliente = new Cliente(); // cria um objeto Cliente com os dados digitados
         cliente.setNome(txtNome.getText()); // nome
-        cliente.setDtNasc(txtDtNasc.getText()); // data de nascimento
-        cliente.setTelefone(txtTelefone.getText()); // telefone
+        cliente.setDtNasc(lerData()); // data de nascimento
+        cliente.setTelefone(lerTelefone()); // telefone
         cliente.setEmail(txtEmail.getText()); // e-mail
 
         try {
@@ -367,19 +402,22 @@ public class FrmTela extends javax.swing.JFrame {
         }
     }
 
-    // Botão "Alterar": atualiza o registro (ou insere se o código estiver vazio)
+    // Botão "Alterar": atualiza o registro atual (ou insere se for um cadastro novo)
     private void btnAlterarActionPerformed(java.awt.event.ActionEvent evt) {
+        if (!camposPreenchidos()) { // se faltou preencher algum campo...
+            return; // ...não grava
+        }
         Cliente cliente = new Cliente(); // objeto com os dados atuais dos campos
         cliente.setNome(txtNome.getText());
-        cliente.setDtNasc(txtDtNasc.getText());
-        cliente.setTelefone(txtTelefone.getText());
+        cliente.setDtNasc(lerData());
+        cliente.setTelefone(lerTelefone());
         cliente.setEmail(txtEmail.getText());
 
         try {
-            if (txtCod.getText().equals("")) { // se o código está vazio é um cadastro NOVO
+            if (codAtual == 0) { // sem registro selecionado = cadastro NOVO
                 dao.inserir(cliente); // faz um INSERT
             } else { // senão, existe código = ALTERAÇÃO de um registro já salvo
-                cliente.setCod(Integer.parseInt(txtCod.getText())); // lê o código
+                cliente.setCod(codAtual); // usa o código guardado
                 dao.alterar(cliente); // faz um UPDATE por esse código
             }
             JOptionPane.showMessageDialog(null, "Gravação realizada com sucesso!!", "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE); // avisa que deu certo
@@ -395,7 +433,7 @@ public class FrmTela extends javax.swing.JFrame {
             // Pergunta "Sim/Não" antes de apagar; guarda a resposta do usuário
             int resposta = JOptionPane.showConfirmDialog(rootPane, "Deseja excluir o registro: ", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
             if (resposta == JOptionPane.YES_OPTION) { // se o usuário escolheu "Sim"
-                dao.excluir(Integer.parseInt(txtCod.getText())); // manda o DAO fazer o DELETE pelo código
+                dao.excluir(codAtual); // manda o DAO fazer o DELETE pelo código guardado
                 JOptionPane.showMessageDialog(null, "Registro excluído com sucesso!!", "Mensagem do Programa", JOptionPane.INFORMATION_MESSAGE); // avisa
                 carregarDados(); // recarrega a lista e a grid
             } else { // se escolheu "Não"

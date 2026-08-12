@@ -10,6 +10,7 @@ public class Login extends javax.swing.JFrame {
     private JPasswordField txtSenha; // caixa de texto da senha (mostra pontos, não o texto)
     private JButton btnEntrar;       // botão para entrar no sistema
     private JButton btnSair;         // botão para sair do programa
+    private JButton btnCadastrar;    // botão para abrir a tela de cadastro de usuário
 
     // Construtor: roda automaticamente quando criamos "new Login()"
     public Login() {
@@ -32,6 +33,7 @@ public class Login extends javax.swing.JFrame {
         txtSenha = new JPasswordField(); // cria a caixa de senha
         btnEntrar = new JButton("Entrar"); // cria o botão Entrar
         btnSair = new JButton("Sair"); // cria o botão Sair
+        btnCadastrar = new JButton("Cadastrar"); // cria o botão Cadastrar
 
         // setBounds(x, y, largura, altura) define posição e tamanho de cada componente
         lblTitulo.setBounds(20, 10, 120, 20);
@@ -41,6 +43,7 @@ public class Login extends javax.swing.JFrame {
         txtSenha.setBounds(20, 125, 180, 25);
         btnEntrar.setBounds(20, 170, 85, 30);
         btnSair.setBounds(115, 170, 85, 30);
+        btnCadastrar.setBounds(20, 205, 180, 30);
 
         // --- add(...) coloca cada componente na janela. Sem isto nada aparece! ---
         add(lblTitulo);
@@ -50,6 +53,7 @@ public class Login extends javax.swing.JFrame {
         add(txtSenha);
         add(btnEntrar);
         add(btnSair);
+        add(btnCadastrar);
 
         // --- Liga os componentes aos métodos de evento ---
 
@@ -65,6 +69,12 @@ public class Login extends javax.swing.JFrame {
                 btnSairActionPerformed(evt); // sai do sistema
             }
         });
+        // Botão Cadastrar: quando for clicado, chama o método que abre a tela de cadastro
+        btnCadastrar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCadastrarActionPerformed(evt); // abre a tela de cadastro de usuário
+            }
+        });
         // Pressionar ENTER dentro do campo da senha também dispara o login
         txtSenha.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -74,7 +84,7 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
-        setSize(240, 240); // tamanho da janela (largura, altura)
+        setSize(240, 265); // tamanho da janela (largura, altura)
         setLocationRelativeTo(null); // centraliza a janela na tela
         setResizable(false); // não deixa o usuário redimensionar a janela
     }
@@ -96,5 +106,11 @@ public class Login extends javax.swing.JFrame {
     // Botão "Sair": encerra o programa
     private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {
         System.exit(0); // encerra a aplicação
+    }
+
+    // Botão "Cadastrar": abre a tela de cadastro de usuário
+    private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {
+        CadastroUsuario cadastro = new CadastroUsuario(); // cria a tela de cadastro
+        cadastro.setVisible(true); // mostra a tela de cadastro
     }
 }

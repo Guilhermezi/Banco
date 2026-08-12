@@ -72,5 +72,16 @@ public class ClienteDAO {
             ps.setInt(1, cod);
             ps.executeUpdate();
         }
+        reiniciarAutoIncrement(); // reusa o número que ficou livre (sem "buracos")
+    }
+
+    // Reseta o AUTO_INCREMENT para o maior código existente + 1.
+    // Assim, se apagar o 6 (e o maior for o 5), o próximo cadastro volta a ser o 6.
+    private void reiniciarAutoIncrement() throws SQLException {
+        String sql = "ALTER TABLE tbclientes AUTO_INCREMENT = 1"; // 1 = MariaDB usa o maior código + 1 automaticamente
+        try (Connection con = Conexao.getConexao();
+             Statement stmt = con.createStatement()) {
+            stmt.executeUpdate(sql);
+        }
     }
 }
