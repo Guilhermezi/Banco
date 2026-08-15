@@ -210,7 +210,7 @@ public class FrmTela extends javax.swing.JFrame {
             }
         });
 
-        setSize(630, 460); // tamanho da janela (largura, altura)
+        setSize(630, 490); // tamanho da janela (largura, altura)
         setLocationRelativeTo(null); // centraliza a janela na tela
         setResizable(false); // não deixa o usuário redimensionar a janela
     }

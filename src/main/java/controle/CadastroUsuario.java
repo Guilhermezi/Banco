@@ -83,7 +83,7 @@ public class CadastroUsuario extends javax.swing.JFrame {
             }
         });
 
-        setSize(240, 290); // tamanho da janela (largura, altura)
+        setSize(240, 300); // tamanho da janela (largura, altura)
         setLocationRelativeTo(null); // centraliza a janela na tela
         setResizable(false); // não deixa o usuário redimensionar a janela
     }
