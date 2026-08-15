@@ -1,0 +1,24 @@
+services:
+  # Banco de dados MariaDB (compatível com o MySQL do projeto)
+  db:
+    image: mariadb:11
+    container_name: banco-mariadb
+    restart: unless-stopped
+    environment:
+      # Senha vazia para o root, assim o programa Java conecta sem configuração
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      # Já cria o banco "clientes" e aplica o script de criação nas primeiras vezes
+      MYSQL_DATABASE: clientes
+      MYSQL_CHARSET: latin1
+      MYSQL_COLLATION: latin1_swedish_ci
+    ports:
+      # Porta padrão do MySQL; o programa conecta em localhost:3306
+      - "3306:3306"
+    volumes:
+      # Pasta onde o MariaDB guarda os dados (sobrevive a docker compose down)
+      - banco-data:/var/lib/mysql
+      # Script que cria as tabelas e insere os dados de exemplo na 1ª subida
+      - ./src/bd_cliente.sql:/docker-entrypoint-initdb.d/01-bd_cliente.sql:ro
+
+volumes:
+  banco-data:
