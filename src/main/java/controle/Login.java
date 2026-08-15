@@ -87,7 +87,7 @@ public class Login extends JFrame {
             }
         });
 
-        setSize(240, 265); // tamanho da janela (largura, altura)
+        setSize(240, 285); // tamanho da janela (largura, altura)
         setLocationRelativeTo(null); // centraliza a janela na tela
         setResizable(false); // não deixa o usuário redimensionar a janela
     }
