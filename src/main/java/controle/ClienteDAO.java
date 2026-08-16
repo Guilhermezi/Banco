@@ -75,6 +75,10 @@ public class ClienteDAO {
         reiniciarAutoIncrement(); // reusa o número que ficou livre (sem "buracos")
     }
 
+    /*==============================
+    --Não está funcionando?!
+    ==============================*/
+
     // Reseta o AUTO_INCREMENT para o maior código existente + 1.
     // Assim, se apagar o 6 (e o maior for o 5), o próximo cadastro volta a ser o 6.
     private void reiniciarAutoIncrement() throws SQLException {

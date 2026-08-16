@@ -2,6 +2,8 @@ package controle;
 
 import javax.swing.*; // componentes gráficos (JFrame, JTextField, JPasswordField, etc.)
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.*; // para capturar os erros do banco (SQLException)
 import java.awt.*; // para capturar os erros do banco (SQLException)
@@ -17,6 +19,9 @@ public class CadastroUsuario extends javax.swing.JFrame {
     private JButton btnCadastrar;        // botão para gravar o novo usuário
     private JButton btnVoltar;           // botão para voltar ao login
 
+    /*=====================================
+    --Construção da interface com Jframe
+    ======================================*/
     // Construtor: roda automaticamente quando criamos "new CadastroUsuario()"
     public CadastroUsuario() {
         initComponents(); // monta a tela (cria e posiciona todos os componentes)
@@ -30,7 +35,7 @@ public class CadastroUsuario extends javax.swing.JFrame {
         setLayout(null); // posicionamento manual (usamos setBounds para cada componente)
 
         JLabel lblTitulo = new JLabel("Cadastro de Usuário:"); // rótulo do título
-        lblTitulo.setFont(new Font("SansSerif", java.awt.Font.BOLD, 18)); // fonte: negrito, tamanho 18
+        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 18)); // fonte: negrito, tamanho 18
         JLabel lblUsuario = new JLabel("Usuário:"); // rótulo "Usuário:"
         JLabel lblSenha = new JLabel("Senha:"); // rótulo "Senha:"
         JLabel lblConfirma = new JLabel("Confirmar Senha:"); // rótulo "Confirmar Senha:"
@@ -63,23 +68,24 @@ public class CadastroUsuario extends javax.swing.JFrame {
         add(btnCadastrar);
         add(btnVoltar);
 
-        // --- Liga os componentes aos métodos de evento ---
-
+        /*==============================
+        --Eventos da interfacie
+        ==============================*/
         // Botão Cadastrar: quando for clicado, chama o método que grava o usuário
-        btnCadastrar.addActionListener(new java.awt.event.ActionListener() {
+        btnCadastrar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 btnCadastrarActionPerformed(evt); // tenta cadastrar o usuário
             }
         });
         // Botão Voltar: quando for clicado, chama o método que fecha a tela
-        btnVoltar.addActionListener(new java.awt.event.ActionListener() {
+        btnVoltar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 btnVoltarActionPerformed(evt); // volta para o login
             }
         });
         // Pressionar ENTER dentro do campo da confirmação também dispara o cadastro
-        txtConfirma.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
+        txtConfirma.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent evt) {
                 if (evt.getKeyCode() == KeyEvent.VK_ENTER) { // se a tecla foi ENTER...
                     btnCadastrarActionPerformed(null); // ...faz o cadastro
                 }

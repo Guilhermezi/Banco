@@ -3,9 +3,12 @@ package controle;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel; // modelo de dados da tabela (linhas/colunas)
 import javax.swing.text.MaskFormatter; // máscara de digitação dos campos (data, telefone)
+import java.awt.*;
+import java.awt.event.*;
 import java.text.ParseException; // erro se a máscara estiver errada
 import java.sql.*; // para capturar erros do banco
 import java.util.*; // para a lista de clientes carregada pelo DAO
+import java.util.List;
 
 // A tela é uma janela (JFrame). "extends" faz esta classe herdar tudo do JFrame.
 // Responsabilidade desta classe: SOMENTE a interface gráfica e chamar os métodos do DAO.
@@ -38,6 +41,10 @@ public class FrmTela extends javax.swing.JFrame {
 
     private JLabel lblStatus;         // texto que mostra em qual registro estamos
 
+    /*==============================
+    --Estruturação das tabelas
+    ==============================*/
+
     // Construtor: roda automaticamente quando criamos "new frmTela()"
     public FrmTela() {
         initComponents(); // monta a tela (cria e posiciona todos os componentes)
@@ -65,7 +72,7 @@ public class FrmTela extends javax.swing.JFrame {
         setLayout(null); // posicionamento manual (usamos setBounds para cada componente)
 
         JLabel lblTitulo = new JLabel("Cadastro de Clientes"); // rótulo do título
-        lblTitulo.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 18)); // fonte: negrito, tamanho 18
+        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 18)); // fonte: negrito, tamanho 18
 
         JLabel lblNome = new JLabel("Nome:");            // rótulo "Nome:"
         JLabel lblDtNasc = new JLabel("Data de Nascimento:"); // rótulo "Data de Nascimento:"
@@ -87,10 +94,10 @@ public class FrmTela extends javax.swing.JFrame {
         txtDtNasc.setBounds(290, 60, 110, 25);
         lblTelefone.setBounds(20, 95, 80, 20);
         txtTelefone.setBounds(20, 115, 160, 25);
-        lblEmail.setBounds(200, 95, 60, 20);
-        txtEmail.setBounds(200, 115, 260, 25);
-        lblPesquisa.setBounds(480, 95, 80, 20);
-        txtPesquisa.setBounds(480, 115, 120, 25);
+        lblEmail.setBounds(290, 95, 60, 20);
+        txtEmail.setBounds(290, 115, 260, 25);
+        lblPesquisa.setBounds(600, 95, 80, 20);
+        txtPesquisa.setBounds(600, 115, 120, 25);
 
         // Cria o modelo da tabela sobrescrevendo isCellEditable para sempre retornar false
         modelo = new DefaultTableModel() {
@@ -101,7 +108,7 @@ public class FrmTela extends javax.swing.JFrame {
         modelo.setColumnIdentifiers(new Object[]{"Código", "Nome", "Data de Nascimento", "Telefone", "E-mail"}); // títulos das 5 colunas
         tblClientes = new JTable(modelo); // cria a tabela usando o modelo criado acima
         JScrollPane scroll = new JScrollPane(tblClientes); // coloca a tabela dentro de uma barra de rolagem
-        scroll.setBounds(20, 155, 580, 200); // posição/tamanho da tabela na janela
+        scroll.setBounds(20, 155, 700, 200); // posição/tamanho da tabela na janela
         add(scroll); // adiciona a tabela (com a barra de rolagem) na janela
 
         btnPrimeiro = new JButton("|<"); // botão "ir ao primeiro" (símbolo |< )
@@ -118,10 +125,10 @@ public class FrmTela extends javax.swing.JFrame {
         btnAnterior.setBounds(75, 375, 50, 25);
         btnProximo.setBounds(130, 375, 50, 25);
         btnUltimo.setBounds(185, 375, 50, 25);
-        btnNovo.setBounds(260, 375, 80, 25);
-        btnGravar.setBounds(345, 375, 80, 25);
-        btnAlterar.setBounds(430, 375, 80, 25);
-        btnExcluir.setBounds(515, 375, 80, 25);
+        btnNovo.setBounds(350, 375, 80, 25);
+        btnGravar.setBounds(440, 375, 80, 25);
+        btnAlterar.setBounds(530, 375, 80, 25);
+        btnExcluir.setBounds(620, 375, 80, 25);
 
         lblStatus = new JLabel("Registro: 1"); // texto inicial da barra de status
         lblStatus.setBounds(20, 410, 300, 20);  // posição da barra de status
@@ -148,73 +155,77 @@ public class FrmTela extends javax.swing.JFrame {
         add(btnExcluir);
         add(lblStatus);
 
-        // --- Liga os componentes aos métodos de evento (a "ponte" interface <-> lógica) ---
+        /*==============================
+        --Eventos
+        ==============================*/
 
         // Campo de pesquisa: quando SOLTAR uma tecla, chama o método de busca
-        txtPesquisa.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
+        txtPesquisa.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent evt) {
                 txtPesquisaKeyReleased(evt); // pesquisa por nome "ao vivo"
             }
         });
         // Tabela: quando CLICAR com o mouse, mostra a linha clicada nos campos
-        tblClientes.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
+        tblClientes.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
                 tblClientesMouseClied(evt);
             }
         });
         // Tabela: quando PRESSIONAR tecla (setas), sincroniza os campos com a linha atual
-        tblClientes.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
+        tblClientes.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent evt) {
                 tblClientesKeyPressed(evt);
             }
         });
         // Cada botão: quando for clicado, chama o seu método correspondente
-        btnPrimeiro.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnPrimeiro.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnPrimeiroRegestroActionPerformed(evt); // vai ao primeiro registro
             }
         });
-        btnAnterior.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnAnterior.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnVoltarUmRegestroActionPerformed(evt); // volta um registro
             }
         });
-        btnProximo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnProximo.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnAvancarUmRegestroActionPerformed(evt); // avança um registro
             }
         });
-        btnUltimo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnUltimo.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnUltimoRegestroActionPerformed(evt); // vai ao último registro
             }
         });
-        btnNovo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnNovo.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnNovoActionPerfomed(evt); // limpa os campos
             }
         });
-        btnGravar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnGravar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnGravarActionPerformed(evt); // grava (insert) no banco
             }
         });
-        btnAlterar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnAlterar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnAlterarActionPerformed(evt); // altera (update) o registro
             }
         });
-        btnExcluir.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnExcluir.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
                 btnExcluirActionPerformed(evt); // exclui (delete) o registro
             }
         });
 
-        setSize(630, 460); // tamanho da janela (largura, altura)
+        setSize(740, 500); // tamanho da janela (largura, altura)
         setLocationRelativeTo(null); // centraliza a janela na tela
         setResizable(false); // não deixa o usuário redimensionar a janela
     }
-
+    /*==============================
+    --Preenchimento de tabela
+    ==============================*/
     // Preenche a grid com a lista de clientes carregada
     public void preencherTabela() {
         // Ajusta a largura de cada coluna da tabela
@@ -268,7 +279,9 @@ public class FrmTela extends javax.swing.JFrame {
         txtEmail.setText(c.getEmail());  // e-mail
         lblStatus.setText("Registro: " + (indiceAtual + 1) + " de " + clientes.size()); // barra de status
     }
-
+    /*==============================
+    --Funções de tabela
+    ==============================*/
     // Cria um campo de texto com máscara de digitação (ex.: ##/##/####)
     private JFormattedTextField criarCampoMascarado(String mascara) {
         try {
@@ -297,7 +310,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Evento: clique do mouse em uma linha da tabela
-    private void tblClientesMouseClied(java.awt.event.MouseEvent evt) {
+    private void tblClientesMouseClied(MouseEvent evt) {
         int linha_selecionada = tblClientes.getSelectedRow(); // pega o nº da linha clicada
         if (linha_selecionada >= 0) { // proteção: só age se houver uma linha selecionada
             indiceAtual = linha_selecionada; // a linha clicada vira o registro atual
@@ -306,7 +319,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Evento: tecla pressionada na tabela (setas de navegação)
-    private void tblClientesKeyPressed(java.awt.event.KeyEvent evt) {
+    private void tblClientesKeyPressed(KeyEvent evt) {
         // evento que sincroniza a grid com as setas do teclado
         int linha_selecionada = tblClientes.getSelectedRow(); // pega o nº da linha atual
         if (linha_selecionada >= 0) { // proteção contra linha vazia
@@ -316,7 +329,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Botão "|<": vai ao primeiro registro
-    private void btnPrimeiroRegestroActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnPrimeiroRegestroActionPerformed(ActionEvent evt) {
         try {
             if (!clientes.isEmpty()) { // se existe algum registro...
                 indiceAtual = 0; // vai para a primeira posição
@@ -328,7 +341,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Botão ">|": vai ao último registro
-    private void btnUltimoRegestroActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnUltimoRegestroActionPerformed(ActionEvent evt) {
         try {
             if (!clientes.isEmpty()) { // se existe algum registro...
                 indiceAtual = clientes.size() - 1; // vai para a última posição
@@ -340,7 +353,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Botão "<": volta um registro
-    private void btnVoltarUmRegestroActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnVoltarUmRegestroActionPerformed(ActionEvent evt) {
         try {
             if (indiceAtual > 0) { // se não está no primeiro...
                 indiceAtual--; // ...volta uma posição
@@ -352,7 +365,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Botão ">": avança um registro
-    private void btnAvancarUmRegestroActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnAvancarUmRegestroActionPerformed(ActionEvent evt) {
         try {
             if (indiceAtual < clientes.size() - 1) { // se não está no último...
                 indiceAtual++; // ...avança uma posição
@@ -364,7 +377,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Botão "Novo": limpa os campos para digitar um novo cadastro
-    private void btnNovoActionPerfomed(java.awt.event.ActionEvent evt) {
+    private void btnNovoActionPerfomed(ActionEvent evt) {
         codAtual = 0; // novo registro = ainda não existe código (o banco gera sozinho)
         txtNome.setText(""); // limpa o nome
         txtDtNasc.setValue(null); // limpa a data
@@ -383,7 +396,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Botão "Gravar": insere um novo registro no banco
-    private void btnGravarActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnGravarActionPerformed(ActionEvent evt) {
         if (!camposPreenchidos()) { // se faltou preencher algum campo...
             return; // ...não grava
         }
@@ -403,7 +416,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Botão "Alterar": atualiza o registro atual (ou insere se for um cadastro novo)
-    private void btnAlterarActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnAlterarActionPerformed(ActionEvent evt) {
         if (!camposPreenchidos()) { // se faltou preencher algum campo...
             return; // ...não grava
         }
@@ -428,7 +441,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Botão "Excluir": apaga o registro atual (com confirmação)
-    private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnExcluirActionPerformed(ActionEvent evt) {
         try {
             // Pergunta "Sim/Não" antes de apagar; guarda a resposta do usuário
             int resposta = JOptionPane.showConfirmDialog(rootPane, "Deseja excluir o registro: ", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
@@ -445,7 +458,7 @@ public class FrmTela extends javax.swing.JFrame {
     }
 
     // Evento: digitou no campo de pesquisa (busca por nome que COMEÇA com o texto digitado)
-    private void txtPesquisaKeyReleased(java.awt.event.KeyEvent evt) {
+    private void txtPesquisaKeyReleased(KeyEvent evt) {
         try {
             clientes = dao.buscarPorNome(txtPesquisa.getText()); // pede ao DAO os clientes que combinam
             totalRegistros = clientes.size(); // guarda a quantidade

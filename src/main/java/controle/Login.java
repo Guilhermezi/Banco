@@ -3,6 +3,8 @@ package controle;
 import javax.swing.*; // componentes gráficos (JFrame, JTextField, JPasswordField, etc.)
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 // A tela de login. Responsabilidade: receber usuário e senha e autenticar via UsuarioDAO.
@@ -15,6 +17,9 @@ public class Login extends JFrame {
     private JButton btnSair;         // botão para sair do programa
     private JButton btnCadastrar;    // botão para abrir a tela de cadastro de usuário
 
+    /*==============================
+    --Estruturação da interface
+    ==============================*/
     // Construtor: roda automaticamente quando criamos "new Login()"
     public Login() {
         initComponents(); // monta a tela (cria e posiciona todos os componentes)
@@ -28,7 +33,7 @@ public class Login extends JFrame {
         setLayout(null); // posicionamento manual (usamos setBounds para cada componente)
 
         JLabel lblTitulo = new JLabel("Login:"); // rótulo do título
-        lblTitulo.setFont(new java.awt.Font("SansSerif", Font.BOLD, 18)); // fonte: negrito, tamanho 18
+        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 18)); // fonte: negrito, tamanho 18
         JLabel lblUsuario = new JLabel("Usuário:"); // rótulo "Usuário:"
         JLabel lblSenha = new JLabel("Senha:"); // rótulo "Senha:"
 
@@ -58,29 +63,30 @@ public class Login extends JFrame {
         add(btnSair);
         add(btnCadastrar);
 
-        // --- Liga os componentes aos métodos de evento ---
-
+        /*==============================
+        --Eventos
+        ==============================*/
         // Botão Entrar: quando for clicado, chama o método de autenticação
-        btnEntrar.addActionListener(new java.awt.event.ActionListener() {
+        btnEntrar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 btnEntrarActionPerformed(evt); // tenta fazer o login
             }
         });
         // Botão Sair: quando for clicado, chama o método que encerra o programa
-        btnSair.addActionListener(new java.awt.event.ActionListener() {
+        btnSair.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 btnSairActionPerformed(evt); // sai do sistema
             }
         });
         // Botão Cadastrar: quando for clicado, chama o método que abre a tela de cadastro
-        btnCadastrar.addActionListener(new java.awt.event.ActionListener() {
+        btnCadastrar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 btnCadastrarActionPerformed(evt); // abre a tela de cadastro de usuário
             }
         });
         // Pressionar ENTER dentro do campo da senha também dispara o login
-        txtSenha.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
+        txtSenha.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent evt) {
                 if (evt.getKeyCode() == KeyEvent.VK_ENTER) { // se a tecla foi ENTER...
                     btnEntrarActionPerformed(null); // ...faz o login
                 }

@@ -8,6 +8,9 @@ import java.sql.*; // Connection, PreparedStatement, ResultSet, SQLException
 // Classe responsável SOMENTE pelos comandos SQL na tabela tbusuario (acesso aos dados)
 public class UsuarioDAO {
 
+    /*==============================
+    --Usado no Login
+    ==============================*/
     // Recebe usuário e senha digitados na tela; devolve true se o login for válido
     public boolean autenticar(String usuario, String senha) {
         try {
@@ -30,7 +33,9 @@ public class UsuarioDAO {
             return false; // e considera o login inválido
         }
     }
-
+    /*====================================
+     --Usado no cadastro para verificar
+     ====================================*/
     // Verifica se um nome de usuário já existe no banco; true = já existe
     public boolean existeUsuario(String usuario) throws SQLException {
         String sql = "select id from tbusuario where usuario = ?"; // SELECT procurando pelo nome de login
@@ -42,7 +47,9 @@ public class UsuarioDAO {
             }
         }
     }
-
+    /*==============================
+    --Usado para cadastrar
+    ==============================*/
     // Insere um novo usuário no banco (cadastro). A senha é gravada como hash
     public void inserir(Usuario usuario) throws SQLException {
         String sql = "insert into tbusuario (usuario, senha) values (?, ?)"; // INSERT nas colunas usuario e senha
